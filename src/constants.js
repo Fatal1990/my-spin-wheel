@@ -43,6 +43,8 @@ export const Defaults = Object.freeze({
     itemLabelRotation: 0,
     itemLabelStrokeColor: '#fff',
     itemLabelStrokeWidth: 0,
+    itemLineHeight: 35,
+    itemMaxWidth: 0,
     items: [],
     lineColor: '#000',
     lineWidth: 1,
