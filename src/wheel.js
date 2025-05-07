@@ -77,6 +77,8 @@ export class Wheel {
     this.onSpin = props.onSpin;
     this.overlayImage = props.overlayImage;
     this.pointerAngle = props.pointerAngle;
+    this.itemMaxWidth = props.itemMaxWidth;
+    this.itemLineHeight = props.itemLineHeight;
   }
 
   /**
@@ -405,7 +407,7 @@ export class Wheel {
 
       const actualLabelColor = item.labelColor
         || (this._itemLabelColors[i % this._itemLabelColors.length] // Fall back to a value from the repeating set.
-        || 'transparent'); // Handle empty string/undefined.
+          || 'transparent'); // Handle empty string/undefined.
 
       if (item.label.trim() === '' || actualLabelColor === 'transparent') continue;
 
@@ -457,7 +459,7 @@ export class Wheel {
       }
 
       ctx.fillStyle = actualLabelColor;
-      ctx.fillText(item.label, 0, actualItemLabelBaselineOffset);
+      this.fillWrappedText(ctx, item.label, actualItemLabelBaselineOffset, this.itemMaxWidth, this.itemLineHeight);
 
       if (this.debug) {
         // Draw label anchor point
@@ -471,7 +473,28 @@ export class Wheel {
       ctx.restore();
 
     }
+  }
 
+  fillWrappedText(ctx, label, y, maxWidth, lineHeight) {
+    const words = label.split(' ');
+
+    let currentLine = '';
+    let currentY = y;
+
+    for (const word of words) {
+      const line = currentLine + word + ' ';
+      const lineTextMetrics = ctx.measureText(line);
+
+      if (lineTextMetrics.width > maxWidth && '' !== currentLine) {
+        ctx.fillText(currentLine, 0, currentY);
+        currentLine = word + ' ';
+        currentY += lineHeight;
+      } else {
+        currentLine = line;
+      }
+    }
+
+    ctx.fillText(currentLine, 0, currentY);
   }
 
   drawDebugDragPoints(ctx) {
@@ -651,7 +674,7 @@ export class Wheel {
    * Return n scaled to the size of the canvas.
    */
   getScaledNumber(n) {
-     return (n / Constants.baseCanvasSize) * this._size;
+    return (n / Constants.baseCanvasSize) * this._size;
   }
 
   getActualPixelRatio() {
